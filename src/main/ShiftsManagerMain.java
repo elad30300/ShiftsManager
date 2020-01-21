@@ -8,7 +8,7 @@ import java.awt.Toolkit;
 import javax.swing.JOptionPane;
 
 
-public class MainTest {
+public class ShiftsManagerMain {
 	public static void main(String[] args) {
 		try {
 			GUIManager.setLookAndFeel();

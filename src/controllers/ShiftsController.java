@@ -94,7 +94,7 @@ public class ShiftsController {
 							finalDate); latestDateToCheck = WeekManager.incrementDateByDays(latestDateToCheck, 1)) {
 				ArrayList<Shift> shifts = filterShiftsByEmployee(employee,
 						this.dataController.getAllShifts(earliestDateToCheck, latestDateToCheck));
-				if (shifts.size() >= 6) {
+				if (shifts.size() >= maxNumberOfShiftsAllowed) {
 					return shifts;
 				}
 
@@ -169,6 +169,7 @@ public class ShiftsController {
 								.incrementDateByWeeks(latestDateToCheck, 1)) {
 					ArrayList<Shift> shifts = filterShiftsByEmployee(employee,
 							this.dataController.getAllShifts(earliestDateToCheck, latestDateToCheck));
+					shifts = filterShiftsByNights(shifts);
 					if (shifts.size() >= maxNumberOfShiftsAllowed) {
 						return shifts;
 					}
@@ -197,11 +198,13 @@ public class ShiftsController {
 				if (!latestDateToCheck.after(finalDate)) {
 					ArrayList<Shift> shifts = this.dataController.getAllShifts(earliestDateToCheck, latestDateToCheck);
 					shifts = filterShiftsByEmployee(employee, shifts);
+					shifts = filterShiftsByNights(shifts);
 					int numberOfNightShiftsInPreviousWeek = shifts.size();
 					earliestDateToCheck = WeekManager.incrementDateByWeeks(earliestDateToCheck, 1);
 					latestDateToCheck = WeekManager.incrementDateByWeeks(latestDateToCheck, 1);
 					shifts = this.dataController.getAllShifts(earliestDateToCheck, latestDateToCheck);
 					shifts = filterShiftsByEmployee(employee, shifts);
+					shifts = filterShiftsByNights(shifts);
 					int numberOfNightShiftsInCurrentWeek = shifts.size();
 					if (numberOfNightShiftsInPreviousWeek == maxNumberOfShiftsAllowed && numberOfNightShiftsInCurrentWeek < 7 - maxNumberOfShiftsAllowed) {
 						return shifts;
@@ -318,6 +321,21 @@ public class ShiftsController {
 				Shift shift = (Shift) shifts.get(i);
 				Date startDate = WeekManager.setHoursOfDay(shift.getStartTime(), 0);
 				if (!startDate.equals(date)) {
+					shifts.remove(i--);
+				}
+			}
+
+			return shifts;
+		} catch (Exception var6) {
+			throw var6;
+		}
+	}
+	
+	public ArrayList<Shift> filterShiftsByNights(ArrayList<Shift> shifts) throws Exception {
+		try {
+			for (int i = 0; i < shifts.size(); ++i) {
+				Shift shift = (Shift) shifts.get(i);
+				if (!this.isNightShift(shift)) {
 					shifts.remove(i--);
 				}
 			}
